@@ -11,10 +11,7 @@ setup(
     url='https://github.com/johnwick123f/FastAudioSR',
     license='MIT',
     install_requires=[
-        'soundfile',
         'soxr',
-        'pydub',
-        'scipy',
         'timm',
     ],
     classifiers=[
