@@ -6,13 +6,13 @@ FlashSR is released under an apache-2.0 license.
 
 Model link: https://huggingface.co/YatharthS/FlashSR
 ## Usage
-Simple 1 line installation
+Simple 1 line installation:
 
 ```
 pip install git+https://github.com/ysharma3501/FlashSR.git
 ```
 
-Load model
+Load model:
 ```python
 from FastAudioSR import FASR
 from huggingface_hub import hf_hub_download
@@ -23,7 +23,7 @@ upsampler = FASR(file_path)
 _ = upsampler.model.half()
 ```
 
-Run the model
+Run the model:
 ```python
 import librosa
 import torch
@@ -34,6 +34,38 @@ lowres_wav = torch.from_numpy(y).unsqueeze(0).half()
 
 new_wav = upsampler.run(lowres_wav)
 Audio(new_wav, rate=48000)
+```
+
+
+## Onnx usage
+Big thanks to [Xenova](https://github.com/xenova/) for converting FlashSR to onnx and decreasing model size to just **500kb** making it perfect for edge devices!
+
+Installation:
+```
+pip install onnxruntime librosa soundfile huggingface-hub
+```
+
+Running the model:
+```python
+import librosa
+import onnxruntime as ort
+import numpy as np
+import soundfile as sf
+from huggingface_hub import hf_hub_download
+
+# Download the ONNX model from HF Hub
+model_path = hf_hub_download(repo_id="YatharthS/FlashSR", filename="model.onnx", subfolder="onnx")
+
+# Load audio file at 16kHz
+y, sr = librosa.load("path/to/audio.wav", sr=16000)  # Resamples to 16kHz
+lowres_wav = y[np.newaxis, :]  # Add batch dimension
+
+# Create ONNX session and run inference
+ort_session = ort.InferenceSession(model_path)
+onnx_output = ort_session.run(["reconstruction"], {"audio_values": lowres_wav})[0]
+
+# Save output audio at 48kHz
+sf.write('output.wav', onnx_output.squeeze(0), samplerate=48000)
 ```
 
 ## Final notes
