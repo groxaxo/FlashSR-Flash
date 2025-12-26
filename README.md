@@ -19,6 +19,8 @@ from huggingface_hub import hf_hub_download
 
 file_path = hf_hub_download(repo_id="YatharthS/FlashSR", filename="upsampler.pth", local_dir=".")
 upsampler = FASR(file_path)
+
+_ = upsampler.model.half()
 ```
 
 Run the model
@@ -28,7 +30,7 @@ import torch
 from IPython.display import Audio
 
 y, sr = librosa.load("path/to/audio.wav", sr=16000) ## resamples to 16khz sampling_rate
-lowres_wav = torch.from_numpy(y).unsqueeze(0)
+lowres_wav = torch.from_numpy(y).unsqueeze(0).half()
 
 new_wav = upsampler.run(lowres_wav)
 Audio(new_wav, rate=48000)
