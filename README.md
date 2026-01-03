@@ -73,7 +73,7 @@ sf.write('output.wav', onnx_output.squeeze(0), samplerate=48000)
 The onnx model can be used in streaming mode for even lower latency. With a reasonable modern desktop/laptop CPU,
 the upsampling can usually be done in real-time on a single core.
 
-```
+```python
 from FastAudioSR.streaming import StreamingFASRONNX
 import numpy as np
 import soundfile as sf
