@@ -21,7 +21,14 @@ class OptimizedFASRONNX:
     
     This implementation uses scipy for resampling and proper ONNX Runtime
     threading configuration to avoid performance issues.
+    
+    The model upsamples from 16kHz to 48kHz (3x upsampling factor).
     """
+    
+    # Audio configuration constants
+    INPUT_SAMPLE_RATE = 16000   # Input sample rate (Hz)
+    OUTPUT_SAMPLE_RATE = 48000  # Output sample rate (Hz)
+    UPSAMPLING_FACTOR = OUTPUT_SAMPLE_RATE // INPUT_SAMPLE_RATE  # 3x
     
     def __init__(
         self,
@@ -193,13 +200,13 @@ class OptimizedFASRONNX:
                     result.append(chunk)
                 else:
                     # Subsequent chunks: trim the overlap region at the start
-                    # Calculate overlap in output space (48kHz)
-                    overlap_out = overlap * 3  # 16kHz -> 48kHz is 3x
+                    # Calculate overlap in output space
+                    overlap_out = overlap * self.UPSAMPLING_FACTOR
                     result.append(chunk[overlap_out:])
             return np.concatenate(result)
         else:
             # Crossfade overlap regions
-            return self._crossfade_chunks(chunks, overlap * 3)
+            return self._crossfade_chunks(chunks, overlap * self.UPSAMPLING_FACTOR)
     
     def _crossfade_chunks(
         self,
