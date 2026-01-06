@@ -5,6 +5,15 @@ This is a tiny audio super-resolution model based on [hierspeech++](https://gith
 FlashSR is released under an apache-2.0 license.
 
 Model link: https://huggingface.co/YatharthS/FlashSR
+
+## Performance & Best Practices
+
+For optimal performance and quality, see [docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md) which covers:
+- Efficient audio resampling with `scipy.signal.resample_poly`
+- ONNX Runtime threading configuration
+- Chunk processing with overlap for better quality
+- Using different execution providers (CPU, OpenVINO, CUDA)
+
 ## Usage
 Simple 1 line installation:
 

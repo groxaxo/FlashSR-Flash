@@ -4,10 +4,24 @@ from collections import deque
 
 class StreamingFASRONNX:
     def __init__(self, onnx_model_path, onnx_execution_provider = 'CPUExecutionProvider', n_cpu = 1):
+        """
+        Initialize streaming ONNX inference session for audio super-resolution.
         
+        Args:
+            onnx_model_path: Path to the ONNX model file
+            onnx_execution_provider: ONNX execution provider (e.g., 'CPUExecutionProvider', 
+                                    'OpenVINOExecutionProvider', 'CUDAExecutionProvider')
+            n_cpu: Number of CPU threads for ONNX Runtime inference.
+                   Note: InferenceSession.Run() is thread-safe and can be called from
+                   multiple threads. However, if using external ThreadPool for chunking,
+                   keep this value low (1-2) to avoid thread oversubscription.
+        """
 
         # Initialize ONNX Runtime session
         session_options = ort.SessionOptions()
+        # Threading configuration: Set intra_op and inter_op threads
+        # When using OpenVINO EP, it has its own threading (NUM_STREAMS, inference threads)
+        # so avoid setting both high to prevent oversubscription
         session_options.intra_op_num_threads = n_cpu
         session_options.inter_op_num_threads = n_cpu
         providers = [onnx_execution_provider]
@@ -57,17 +71,17 @@ class StreamingFASRONNX:
 
     def run(self, input_speech):
         """Upsample the 16khz input speech to 48 khz"""
-        if input_speech.shape != (1,):
+        if input_speech.ndim != 1:
             raise ValueError("Input speech must be a 1D array with shape (N,)")
     
-        if input_speech.dtype != 'float32':
+        if input_speech.dtype != np.float32:
             raise ValueError("Input speech must be of type float32")
         
-        if input_speech.abs().max() > 1.0:
+        if np.abs(input_speech).max() > 1.0:
             raise ValueError("Input speech values must be in the range [-1.0, 1.0]")
 
         upsampled = self.model.run(None, {'x': input_speech[None, None, :]})[0].flatten()
-        upsampled_normalized = upsampled / (abs(upsampled).max() + 1e-7) * 0.999
+        upsampled_normalized = upsampled / (np.abs(upsampled).max() + 1e-7) * 0.999
         return upsampled_normalized
     
     def process_input(self, input_speech, chunk_size = 4000):
