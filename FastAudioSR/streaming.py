@@ -71,17 +71,17 @@ class StreamingFASRONNX:
 
     def run(self, input_speech):
         """Upsample the 16khz input speech to 48 khz"""
-        if input_speech.shape != (1,):
+        if input_speech.ndim != 1:
             raise ValueError("Input speech must be a 1D array with shape (N,)")
     
-        if input_speech.dtype != 'float32':
+        if input_speech.dtype != np.float32:
             raise ValueError("Input speech must be of type float32")
         
-        if input_speech.abs().max() > 1.0:
+        if np.abs(input_speech).max() > 1.0:
             raise ValueError("Input speech values must be in the range [-1.0, 1.0]")
 
         upsampled = self.model.run(None, {'x': input_speech[None, None, :]})[0].flatten()
-        upsampled_normalized = upsampled / (abs(upsampled).max() + 1e-7) * 0.999
+        upsampled_normalized = upsampled / (np.abs(upsampled).max() + 1e-7) * 0.999
         return upsampled_normalized
     
     def process_input(self, input_speech, chunk_size = 4000):
