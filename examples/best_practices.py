@@ -77,7 +77,12 @@ def resample_audio_scipy(
 
 
 def example_basic_inference():
-    """Example 1: Basic inference with single audio file."""
+    """
+    Example 1: Basic inference with single audio file.
+    
+    Note: This example requires 'model.onnx' and 'input.wav' files.
+    Uncomment in __main__ to run.
+    """
     print("Example 1: Basic ONNX inference")
     print("-" * 50)
     
@@ -86,13 +91,13 @@ def example_basic_inference():
     # Initialize model with proper threading
     # n_cpu=1 is good for single-threaded inference
     model = StreamingFASRONNX(
-        'model.onnx',
+        'model.onnx',  # Download from HuggingFace: YatharthS/FlashSR
         onnx_execution_provider='CPUExecutionProvider',
         n_cpu=1  # Keep low if using ThreadPool externally
     )
     
     # Load and resample audio to 16kHz
-    audio = load_audio('input.wav', target_sr=16000)
+    audio = load_audio('input.wav', target_sr=16000)  # Replace with your audio file
     
     # Run inference
     upsampled = model.run(audio)
@@ -103,7 +108,12 @@ def example_basic_inference():
 
 
 def example_optimized_inference():
-    """Example 2: Using the optimized inference module with overlap."""
+    """
+    Example 2: Using the optimized inference module with overlap.
+    
+    Note: This example requires 'model.onnx' and 'input.wav' files.
+    Uncomment in __main__ to run.
+    """
     print("Example 2: Optimized inference with overlap and crossfading")
     print("-" * 50)
     
@@ -111,7 +121,7 @@ def example_optimized_inference():
     
     # Initialize with proper threading configuration
     model = OptimizedFASRONNX(
-        'model.onnx',
+        'model.onnx',  # Download from HuggingFace: YatharthS/FlashSR
         execution_provider='CPUExecutionProvider',
         intra_op_num_threads=1,  # Low when not using parallel chunking
         inter_op_num_threads=1,
@@ -119,7 +129,7 @@ def example_optimized_inference():
     )
     
     # Load audio
-    audio = load_audio('input.wav', target_sr=16000)
+    audio = load_audio('input.wav', target_sr=16000)  # Replace with your audio file
     
     # Process with overlap and crossfading for best quality
     upsampled = model.upsample(
@@ -143,6 +153,9 @@ def example_parallel_chunking():
     Rule of thumb:
     - If ThreadPoolExecutor(max_workers=N): set intra_op_num_threads=1 (or small)
     - If you want ORT to parallelize internally: don't use ThreadPool
+    
+    Note: This example requires 'model.onnx' and 'input.wav' files.
+    Uncomment in __main__ to run.
     """
     print("Example 3: Parallel chunk processing")
     print("-" * 50)
@@ -152,7 +165,7 @@ def example_parallel_chunking():
     # Initialize with parallel chunking enabled
     # IMPORTANT: intra_op_num_threads=1 to avoid thread oversubscription
     model = OptimizedFASRONNX(
-        'model.onnx',
+        'model.onnx',  # Download from HuggingFace: YatharthS/FlashSR
         execution_provider='CPUExecutionProvider',
         intra_op_num_threads=1,  # MUST be low when using ThreadPool
         inter_op_num_threads=1,
@@ -161,7 +174,7 @@ def example_parallel_chunking():
     )
     
     # Load audio
-    audio = load_audio('input.wav', target_sr=16000)
+    audio = load_audio('input.wav', target_sr=16000)  # Replace with your audio file
     
     # Process in parallel
     upsampled = model.process_parallel(audio, chunk_size=80000)
@@ -178,6 +191,9 @@ def example_openvino():
     
     OpenVINO EP has its own threading configuration (NUM_STREAMS, inference threads).
     Don't combine high EP-level parallelism with Python ThreadPool.
+    
+    Note: This example requires 'model.onnx' and 'input.wav' files.
+    Uncomment in __main__ to run.
     """
     print("Example 4: OpenVINO execution provider")
     print("-" * 50)
@@ -188,13 +204,13 @@ def example_openvino():
         # Initialize with OpenVINO provider
         # OpenVINO has its own parallelism controls
         model = StreamingFASRONNX(
-            'model.onnx',
+            'model.onnx',  # Download from HuggingFace: YatharthS/FlashSR
             onnx_execution_provider='OpenVINOExecutionProvider',
             n_cpu=1  # Keep ORT threads low, let OpenVINO handle threading
         )
         
         # Load and process audio
-        audio = load_audio('input.wav', target_sr=16000)
+        audio = load_audio('input.wav', target_sr=16000)  # Replace with your audio file
         upsampled = model.run(audio)
         
         # Save output

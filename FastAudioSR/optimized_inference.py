@@ -171,14 +171,14 @@ class OptimizedFASRONNX:
         hop_size = chunk_size - overlap
         
         for i in range(0, len(audio), hop_size):
-            # Extract chunk with overlap
-            start = max(0, i - overlap // 2)
-            end = min(len(audio), i + chunk_size + overlap // 2)
+            # Extract chunk - each chunk overlaps with the previous one
+            start = i
+            end = min(len(audio), i + chunk_size)
             chunk = audio[start:end]
             
             # Process chunk
             upsampled_chunk = self.process_chunk(chunk)
-            chunks.append((start, upsampled_chunk))
+            chunks.append((i, upsampled_chunk))
             
             if end >= len(audio):
                 break
@@ -187,13 +187,15 @@ class OptimizedFASRONNX:
         if not crossfade or len(chunks) == 1:
             # Simple concatenation (trim overlap)
             result = []
-            for i, (start, chunk) in enumerate(chunks):
+            for i, (pos, chunk) in enumerate(chunks):
                 if i == 0:
+                    # First chunk: keep everything
                     result.append(chunk)
                 else:
+                    # Subsequent chunks: trim the overlap region at the start
                     # Calculate overlap in output space (48kHz)
                     overlap_out = overlap * 3  # 16kHz -> 48kHz is 3x
-                    result.append(chunk[overlap_out // 2:])
+                    result.append(chunk[overlap_out:])
             return np.concatenate(result)
         else:
             # Crossfade overlap regions
