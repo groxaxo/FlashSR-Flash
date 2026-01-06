@@ -4,10 +4,24 @@ from collections import deque
 
 class StreamingFASRONNX:
     def __init__(self, onnx_model_path, onnx_execution_provider = 'CPUExecutionProvider', n_cpu = 1):
+        """
+        Initialize streaming ONNX inference session for audio super-resolution.
         
+        Args:
+            onnx_model_path: Path to the ONNX model file
+            onnx_execution_provider: ONNX execution provider (e.g., 'CPUExecutionProvider', 
+                                    'OpenVINOExecutionProvider', 'CUDAExecutionProvider')
+            n_cpu: Number of CPU threads for ONNX Runtime inference.
+                   Note: InferenceSession.Run() is thread-safe and can be called from
+                   multiple threads. However, if using external ThreadPool for chunking,
+                   keep this value low (1-2) to avoid thread oversubscription.
+        """
 
         # Initialize ONNX Runtime session
         session_options = ort.SessionOptions()
+        # Threading configuration: Set intra_op and inter_op threads
+        # When using OpenVINO EP, it has its own threading (NUM_STREAMS, inference threads)
+        # so avoid setting both high to prevent oversubscription
         session_options.intra_op_num_threads = n_cpu
         session_options.inter_op_num_threads = n_cpu
         providers = [onnx_execution_provider]
