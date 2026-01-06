@@ -1,18 +1,18 @@
+# Core dependencies
 einops==0.7.0
 numpy==1.26.1
-scipy==1.11.3  # Used for high-quality audio resampling (resample_poly)
+scipy==1.11.3
 timm==0.6.13
 huggingface-hub
-soundfile  # For audio I/O (reading/writing WAV files)
+soundfile
 
-# Optional dependencies:
-# librosa  # Only needed for audio loading in examples. For resampling, scipy is recommended.
-# soxr  # Optional: Install for faster resampling with librosa (pip install soxr)
+# Noise Reduction
+noisereduce>=2.0.0
+webrtcvad-wheels>=2.0.10
 
-# PyTorch (for training and non-ONNX inference):
-# torch==2.3.0+cu121
-# torchaudio==2.3.0+cu121
+# ONNX Runtime (Default CPU)
+# For GPU support: pip install onnxruntime-gpu
+onnxruntime>=1.16.0
 
-# ONNX Runtime (choose one based on your hardware):
-# onnxruntime  # CPU
-# onnxruntime-openvino  # Intel OpenVINO (includes CPU, GPU, VPU support)
+# Optional: PyTorch (only if using original model loading)
+# torch

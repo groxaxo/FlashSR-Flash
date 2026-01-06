@@ -7,74 +7,60 @@ FlashSR is released under an apache-2.0 license.
 Model link: https://huggingface.co/YatharthS/FlashSR
 
 ## Performance & Best Practices
-
-For optimal performance and quality, see [docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md) which covers:
-- Efficient audio resampling with `scipy.signal.resample_poly`
-- ONNX Runtime threading configuration
-- Chunk processing with overlap for better quality
-- Using different execution providers (CPU, OpenVINO, CUDA)
+ 
+For optimal performance and quality, see [docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md).
+ 
+- **GPU Inference**: Use `denoise_and_upscale.py --gpu` for CUDA acceleration (requires `onnxruntime-gpu`).
+- **Noise Reduction**: Use the built-in denoising to clean up audio before upscaling.
+- **CPU Optimization**: The default ONNX model runs highly optimized on CPU (up to 200x realtime).
 
 ## Usage
-Simple 1 line installation:
-
+ 
+### 1. Installation
+ 
+```bash
+pip install -r requirements.txt
 ```
-pip install git+https://github.com/ysharma3501/FlashSR.git
+ 
+For GPU support:
+```bash
+pip install onnxruntime-gpu
 ```
-
-Load model:
+ 
+### 2. Denoise & Upscale (Recommended)
+ 
+We provide a complete script that automatically removes background noise (using WebRTC VAD) and upscales the audio.
+ 
+```bash
+# Basic usage (CPU)
+python examples/denoise_and_upscale.py input.mp3 -o output.wav
+ 
+# With GPU acceleration
+python examples/denoise_and_upscale.py input.mp3 -o output.wav --gpu
+ 
+# Adjust settings
+python examples/denoise_and_upscale.py input.mp3 \
+    --denoise-strength 0.9 \
+    --normalize 0.95 \
+    --vad-aggressiveness 3
+```
+ 
+### 3. Python API
+ 
+To use the upsampler in your own code:
+ 
 ```python
-from FastAudioSR import FASR
-from huggingface_hub import hf_hub_download
-
-file_path = hf_hub_download(repo_id="YatharthS/FlashSR", filename="upsampler.pth", local_dir=".")
-upsampler = FASR(file_path)
-
-_ = upsampler.model.half()
-```
-
-Run the model:
-```python
-import librosa
-import torch
-from IPython.display import Audio
-
-y, sr = librosa.load("path/to/audio.wav", sr=16000) ## resamples to 16khz sampling_rate
-lowres_wav = torch.from_numpy(y).unsqueeze(0).half()
-
-new_wav = upsampler.run(lowres_wav)
-Audio(new_wav, rate=48000)
-```
-
-
-## Onnx usage
-Big thanks to [Xenova](https://github.com/xenova/) for converting FlashSR to onnx and decreasing model size to just **500kb** making it perfect for edge devices!
-
-Installation:
-```
-pip install onnxruntime librosa soundfile huggingface-hub
-```
-
-Running the model:
-```python
-import librosa
 import onnxruntime as ort
 import numpy as np
-import soundfile as sf
-from huggingface_hub import hf_hub_download
-
-# Download the ONNX model from HF Hub
-model_path = hf_hub_download(repo_id="YatharthS/FlashSR", filename="model.onnx", subfolder="onnx")
-
-# Load audio file at 16kHz
-y, sr = librosa.load("path/to/audio.wav", sr=16000)  # Resamples to 16kHz
-lowres_wav = y[np.newaxis, :]  # Add batch dimension
-
-# Create ONNX session and run inference
-ort_session = ort.InferenceSession(model_path)
-onnx_output = ort_session.run(["reconstruction"], {"audio_values": lowres_wav})[0]
-
-# Save output audio at 48kHz
-sf.write('output.wav', onnx_output.squeeze(0), samplerate=48000)
+ 
+# Load model
+session = ort.InferenceSession('models/model_lite.onnx')
+ 
+# Prepare input (1, 1, samples)
+input_tensor = audio_data[np.newaxis, np.newaxis, :].astype(np.float32)
+ 
+# Run inference
+output = session.run(None, {'x': input_tensor})[0].squeeze()
 ```
 
 # Streaming Input

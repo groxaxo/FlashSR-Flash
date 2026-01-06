@@ -9,8 +9,9 @@ class StreamingFASRONNX:
         
         Args:
             onnx_model_path: Path to the ONNX model file
-            onnx_execution_provider: ONNX execution provider (e.g., 'CPUExecutionProvider', 
-                                    'OpenVINOExecutionProvider', 'CUDAExecutionProvider')
+            onnx_execution_provider: ONNX execution provider. Supported providers:
+                                    - 'CPUExecutionProvider' (default, recommended)
+                                    - 'OpenVINOExecutionProvider' (Intel hardware acceleration)
             n_cpu: Number of CPU threads for ONNX Runtime inference.
                    Note: InferenceSession.Run() is thread-safe and can be called from
                    multiple threads. However, if using external ThreadPool for chunking,

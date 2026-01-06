@@ -44,7 +44,9 @@ class OptimizedFASRONNX:
         
         Args:
             onnx_model_path: Path to the ONNX model file
-            execution_provider: ONNX execution provider ('CPUExecutionProvider', 'CUDAExecutionProvider', etc.)
+            execution_provider: ONNX execution provider. Supported:
+                                 - 'CPUExecutionProvider' (default, recommended)
+                                 - 'OpenVINOExecutionProvider' (Intel hardware acceleration)
             intra_op_num_threads: Number of threads for intra-op parallelism (default: 1)
                                  Set to 1 when using ThreadPool chunking to avoid oversubscription
             inter_op_num_threads: Number of threads for inter-op parallelism (default: 1)

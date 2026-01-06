@@ -1,10 +1,20 @@
-import torch
 import os
-from .speechsr import SynthesizerTrn
+
+# Torch is optional - only needed for PyTorch-based inference (FASR class)
+# ONNX inference and denoising work without torch
+try:
+    import torch
+    from .speechsr import SynthesizerTrn
+    _HAS_TORCH = True
+except ImportError:
+    _HAS_TORCH = False
 
 class FASR:
     def __init__(self, ckpt_path):
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        if not _HAS_TORCH:
+            raise ImportError("FASR requires PyTorch. Install with: pip install torch")
+        # CPU-only deployment: always use CPU
+        self.device = torch.device('cpu')
         self.hps = {
             "train": {
                 "segment_size": 9600

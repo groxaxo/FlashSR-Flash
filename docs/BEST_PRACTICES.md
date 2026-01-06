@@ -172,13 +172,6 @@ Best for: Intel CPUs, GPUs, VPUs
 - Inference threads per stream
 - Don't combine high OpenVINO parallelism with Python ThreadPool
 
-### CUDA (NVIDIA GPUs)
-```bash
-pip install onnxruntime-gpu
-```
-
-Best for: NVIDIA GPUs with CUDA support
-
 ## Complete Example
 
 See `examples/best_practices.py` for complete working examples demonstrating:
