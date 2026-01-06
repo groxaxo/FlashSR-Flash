@@ -6,6 +6,14 @@ FlashSR is released under an apache-2.0 license.
 
 Model link: https://huggingface.co/YatharthS/FlashSR
 
+## Features
+ 
+- **Ultra-Fast Upscaling**: 3x super-resolution (16kHz -> 48kHz) at 200-400x real-time on CPU.
+- **Smart Noise Reduction**: Integrated [WebRTC VAD](https://github.com/wiseman/py-webrtcvad) detects silence to build accurate noise profiles, coupled with spectral gating for clean output.
+- **GPU Acceleration**: Optional CUDA support for even faster processing using `onnxruntime-gpu`.
+- **Edge Optimized**: Lightweight ONNX model (~500KB) suitable for deployment on low-power devices.
+- **Streaming Support**: Low-latency streaming capabilities for real-time applications.
+ 
 ## Performance & Best Practices
  
 For optimal performance and quality, see [docs/BEST_PRACTICES.md](docs/BEST_PRACTICES.md).
@@ -52,15 +60,21 @@ To use the upsampler in your own code:
 ```python
 import onnxruntime as ort
 import numpy as np
+import soundfile as sf
  
-# Load model
-session = ort.InferenceSession('models/model_lite.onnx')
+# 1. Load model
+session = ort.InferenceSession('models/model_lite.onnx', providers=['CPUExecutionProvider'])
  
-# Prepare input (1, 1, samples)
-input_tensor = audio_data[np.newaxis, np.newaxis, :].astype(np.float32)
+# 2. Load and prepare audio (must be 16kHz)
+audio, sr = sf.read('input.wav')
+# ... ensure audio is 16kHz and mono ...
+input_tensor = audio[np.newaxis, np.newaxis, :].astype(np.float32)
  
-# Run inference
+# 3. Run inference
 output = session.run(None, {'x': input_tensor})[0].squeeze()
+ 
+# 4. Save output (48kHz)
+sf.write('output_upscaled.wav', output, 48000)
 ```
 
 # Streaming Input
