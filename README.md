@@ -1,6 +1,6 @@
 # FlashSR
 
-This is a tiny audio super-resolution model based on [hierspeech++](https://github.com/sh-lee-prml/HierSpeechpp) that upscales 16khz audio into much clearer 48khz audio at speed over 200x realtime to 400x realtime!
+This is a tiny audio super-resolution model based on [hierspeech++](https://github.com/sh-lee-prml/HierSpeechpp) that upscales 16khz audio into much clearer 48khz audio efficiently!
 
 FlashSR is released under an apache-2.0 license.
 
@@ -8,7 +8,7 @@ Model link: https://huggingface.co/YatharthS/FlashSR
 
 ## Features
  
-- **Ultra-Fast Upscaling**: 3x super-resolution (16kHz -> 48kHz) at 200-400x real-time on CPU.
+- **Ultra-Fast Upscaling**: 3x super-resolution (16kHz -> 48kHz).
 - **Smart Noise Reduction**: Integrated [WebRTC VAD](https://github.com/wiseman/py-webrtcvad) detects silence to build accurate noise profiles, coupled with spectral gating for clean output.
 - **GPU Acceleration**: Optional CUDA support for even faster processing using `onnxruntime-gpu`.
 - **Edge Optimized**: Lightweight ONNX model (~500KB) suitable for deployment on low-power devices.
@@ -20,7 +20,7 @@ For optimal performance and quality, see [docs/BEST_PRACTICES.md](docs/BEST_PRAC
  
 - **GPU Inference**: Use `denoise_and_upscale.py --gpu` for CUDA acceleration (requires `onnxruntime-gpu`).
 - **Noise Reduction**: Use the built-in denoising to clean up audio before upscaling.
-- **CPU Optimization**: The default ONNX model runs highly optimized on CPU (up to 200x realtime).
+- **CPU Optimization**: The default ONNX model runs efficiently on CPU.
 
 ## Usage
  
